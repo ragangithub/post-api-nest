@@ -23,6 +23,8 @@ model User {
   profile Profile?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@map("users")
 }
 
 model Profile{
@@ -36,6 +38,8 @@ model Profile{
   updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
   published Boolean @default(false)
+
+    @@map("profiles")
 }
 
 model Post{
@@ -46,4 +50,6 @@ model Post{
   authorId Int
   updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
+
+   @@map("posts")
 }
