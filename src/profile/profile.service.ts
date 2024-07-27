@@ -48,7 +48,13 @@ export default class ProfileService {
       throw new NotFoundException('Profile not found')
     }
 
-    const updateData = {}
+    interface UpdateData {
+      image?: string
+      location?: string
+      bio?: string
+    }
+
+    const updateData: UpdateData = {}
 
     if (dto.image) {
       updateData.image = dto.image
