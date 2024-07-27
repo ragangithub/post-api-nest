@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Param, Post, Put } from '@nestjs/common'
+import { Body, Controller, Delete, Param, Patch, Post } from '@nestjs/common'
 import ProfileService from './profile.service'
 import ProfileDto from './dto/createProfile.dto'
 import UpdateProfileDto from './dto/updateProfile.dto'
@@ -18,7 +18,7 @@ export default class ProfileController {
     return this.profileService.deleteProfile(profileId)
   }
 
-  @Put(':id')
+  @Patch(':id')
   async update(@Param('id') id: string, @Body() dto: UpdateProfileDto) {
     const profileId = parseInt(id, 10)
     const updatedProfile = await this.profileService.updateProfile(
