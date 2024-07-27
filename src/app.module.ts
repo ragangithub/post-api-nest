@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
+import PostModule from './post/post.module'
 import ProfileModule from './profile/profile.module'
 import PrismaModule from './prisma/prisma.module'
 import AuthModule from './auth/auth.module'
@@ -14,6 +15,7 @@ import AppService from './app.service'
     UserModule,
     PrismaModule,
     ProfileModule,
+    PostModule,
   ],
   controllers: [AppController],
   providers: [AppService],
