@@ -2,10 +2,16 @@ import { Injectable, NotFoundException } from '@nestjs/common'
 import AuthDto from 'src/auth/dto/signupAuth.dto'
 import PrismaService from 'src/prisma/prisma.service'
 import * as argon from 'argon2'
+import { JwtService } from '@nestjs/jwt'
+import { ConfigService } from '@nestjs/config'
 
 @Injectable()
 export default class UserService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private jwt: JwtService,
+    private config: ConfigService,
+  ) {}
 
   async signup(dto: AuthDto) {
     const hash = await argon.hash(dto.password)
@@ -19,7 +25,8 @@ export default class UserService {
       },
     })
 
-    return user
+    // return token
+    return this.signToken(user.id, user.email)
   }
 
   async deleteUser(userId: number) {
@@ -60,5 +67,25 @@ export default class UserService {
     })
 
     return { message: 'user deleted successfully' }
+  }
+
+  async signToken(
+    userId: number,
+    email: string,
+  ): Promise<{ access_token: string }> {
+    const payload = {
+      sub: userId,
+      email,
+    }
+    const secret = this.config.get('JWT_SECRET')
+
+    const token = await this.jwt.signAsync(payload, {
+      expiresIn: '15m',
+      secret,
+    })
+
+    return {
+      access_token: token,
+    }
   }
 }
