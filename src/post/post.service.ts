@@ -23,14 +23,16 @@ export default class PostService {
       },
     })
 
+    console.log('newPost', newPost)
+
     return newPost
   }
 
   async getAllPosts() {
     const allPosts = await this.prisma.post.findMany({
-      include: {
-        author: true,
-      },
+      // include: {
+      //   author: true,
+      // },
     })
 
     return allPosts
