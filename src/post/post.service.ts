@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common'
 import PrismaService from 'src/prisma/prisma.service'
 import PostDto from './dto/createPost.dto'
 import UpdatePostDto from './dto/updatePost.dto'
@@ -28,17 +32,26 @@ export default class PostService {
         author: true,
       },
     })
-    console.log('hi')
+
     return allPosts
   }
 
-  async deletePost(postId: number) {
+  async deletePost(postId: number, incomingId: number) {
     const post = await this.prisma.post.findUnique({
       where: { id: postId },
+      include: {
+        author: true,
+      },
     })
 
     if (!post) {
       throw new NotFoundException('Post not found')
+    }
+
+    if (post.author.id !== incomingId) {
+      throw new UnauthorizedException(
+        'You are not authorized to delete this post',
+      )
     }
 
     await this.prisma.post.delete({
@@ -48,13 +61,22 @@ export default class PostService {
     return { message: 'Post deleted successfully' }
   }
 
-  async updatePost(postId: number, dto: UpdatePostDto) {
+  async updatePost(postId: number, dto: UpdatePostDto, incomingId: number) {
     const post = await this.prisma.post.findUnique({
       where: { id: postId },
+      include: {
+        author: true,
+      },
     })
 
     if (!post) {
       throw new NotFoundException('post not found')
+    }
+
+    if (post.author.id !== incomingId) {
+      throw new UnauthorizedException(
+        'You are not authorized to delete this post',
+      )
     }
 
     interface UpdateData {

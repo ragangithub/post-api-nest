@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common'
 import PrismaService from 'src/prisma/prisma.service'
 import ProfileDto from './dto/createProfile.dto'
 
@@ -23,13 +27,25 @@ export default class ProfileService {
     return newProfile
   }
 
-  async deleteProfile(profileId: number) {
+  async deleteProfile(profileId: number, incomingId: number) {
+    // const profile = await this.prisma.profile.findUnique({
+    //   where: { id: profileId },
+    // })
     const profile = await this.prisma.profile.findUnique({
       where: { id: profileId },
+      include: {
+        user: true,
+      },
     })
 
     if (!profile) {
       throw new NotFoundException('Profile not found')
+    }
+
+    if (profile.user.id !== incomingId) {
+      throw new UnauthorizedException(
+        'You are not authorized to delete this post',
+      )
     }
 
     await this.prisma.profile.delete({
@@ -39,13 +55,26 @@ export default class ProfileService {
     return { message: 'Profile deleted successfully' }
   }
 
-  async updateProfile(profileId: number, dto: UpdateProfileDto) {
+  async updateProfile(
+    profileId: number,
+    dto: UpdateProfileDto,
+    incomingId: number,
+  ) {
     const profile = await this.prisma.profile.findUnique({
       where: { id: profileId },
+      include: {
+        user: true,
+      },
     })
 
     if (!profile) {
       throw new NotFoundException('Profile not found')
+    }
+
+    if (profile.user.id !== incomingId) {
+      throw new UnauthorizedException(
+        'You are not authorized to delete this post',
+      )
     }
 
     interface UpdateData {
