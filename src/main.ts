@@ -6,6 +6,8 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
 import winstonLoggerInstance from './utils/logger/winston.logger'
 import AppModule from './app.module'
 
+import GlobalHttpExceptionFilter from './exception-filters/http-exception.filter'
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: WinstonModule.createLogger({ instance: winstonLoggerInstance }),
@@ -19,6 +21,8 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   )
+
+  app.useGlobalFilters(new GlobalHttpExceptionFilter())
   app.setGlobalPrefix('api')
 
   const config = new DocumentBuilder()

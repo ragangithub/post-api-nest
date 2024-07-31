@@ -23,81 +23,113 @@ export default class PostService {
       },
     })
 
-    console.log('newPost', newPost)
-
     return newPost
   }
 
   async getAllPosts() {
-    const allPosts = await this.prisma.post.findMany({
-      // include: {
-      //   author: true,
-      // },
-    })
+    try {
+      const allPosts = await this.prisma.post.findMany({
+        // include: {
+        //   author: true,
+        // },
+      })
 
-    return allPosts
+      if (allPosts.length === 0) {
+        throw new NotFoundException('No posts found')
+      }
+
+      return allPosts
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error
+      } else {
+        throw new Error('An error occurred while fetching posts')
+      }
+    }
   }
 
   async deletePost(postId: number, incomingId: number) {
-    const post = await this.prisma.post.findUnique({
-      where: { id: postId },
-      include: {
-        author: true,
-      },
-    })
+    try {
+      const post = await this.prisma.post.findUnique({
+        where: { id: postId },
+        include: {
+          author: true,
+        },
+      })
 
-    if (!post) {
-      throw new NotFoundException('Post not found')
+      if (!post) {
+        throw new NotFoundException('Post not found')
+      }
+
+      if (post.author.id !== incomingId) {
+        throw new UnauthorizedException(
+          'You are not authorized to delete this post',
+        )
+      }
+
+      await this.prisma.post.delete({
+        where: { id: postId },
+      })
+
+      return { message: 'Post deleted successfully' }
+    } catch (error) {
+      if (
+        error instanceof UnauthorizedException ||
+        error instanceof NotFoundException
+      ) {
+        throw error
+      } else {
+        throw new Error('An error occurred while deleting the post')
+      }
     }
-
-    if (post.author.id !== incomingId) {
-      throw new UnauthorizedException(
-        'You are not authorized to delete this post',
-      )
-    }
-
-    await this.prisma.post.delete({
-      where: { id: postId },
-    })
-
-    return { message: 'Post deleted successfully' }
   }
 
   async updatePost(postId: number, dto: UpdatePostDto, incomingId: number) {
-    const post = await this.prisma.post.findUnique({
-      where: { id: postId },
-      include: {
-        author: true,
-      },
-    })
+    try {
+      const post = await this.prisma.post.findUnique({
+        where: { id: postId },
+        include: {
+          author: true,
+        },
+      })
 
-    if (!post) {
-      throw new NotFoundException('post not found')
+      if (!post) {
+        throw new NotFoundException('post not found')
+      }
+
+      if (post.author.id !== incomingId) {
+        throw new UnauthorizedException(
+          'You are not authorized to delete this post',
+        )
+      }
+
+      interface UpdateData {
+        title?: string
+        text?: string
+      }
+
+      const updateData: UpdateData = {}
+
+      if (dto.title) {
+        updateData.title = dto.title
+      }
+      if (dto.text) {
+        updateData.text = dto.text
+      }
+
+      return await this.prisma.post.update({
+        where: { id: postId },
+        data: updateData,
+      })
+    } catch (error) {
+      if (
+        error instanceof UnauthorizedException ||
+        error instanceof NotFoundException
+      ) {
+        throw error
+      } else {
+        throw new Error('An error occurred while updating the post')
+      }
     }
-
-    if (post.author.id !== incomingId) {
-      throw new UnauthorizedException(
-        'You are not authorized to delete this post',
-      )
-    }
-
-    interface UpdateData {
-      title?: string
-      text?: string
-    }
-
-    const updateData: UpdateData = {}
-
-    if (dto.title) {
-      updateData.title = dto.title
-    }
-    if (dto.text) {
-      updateData.text = dto.text
-    }
-
-    return this.prisma.post.update({
-      where: { id: postId },
-      data: updateData,
-    })
   }
 }

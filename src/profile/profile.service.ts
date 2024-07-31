@@ -28,31 +28,39 @@ export default class ProfileService {
   }
 
   async deleteProfile(profileId: number, incomingId: number) {
-    // const profile = await this.prisma.profile.findUnique({
-    //   where: { id: profileId },
-    // })
-    const profile = await this.prisma.profile.findUnique({
-      where: { id: profileId },
-      include: {
-        user: true,
-      },
-    })
+    try {
+      const profile = await this.prisma.profile.findUnique({
+        where: { id: profileId },
+        include: {
+          user: true,
+        },
+      })
 
-    if (!profile) {
-      throw new NotFoundException('Profile not found')
+      if (!profile) {
+        throw new NotFoundException('Profile not found')
+      }
+
+      if (profile.user.id !== incomingId) {
+        throw new UnauthorizedException(
+          'You are not authorized to delete this post',
+        )
+      }
+
+      await this.prisma.profile.delete({
+        where: { id: profileId },
+      })
+
+      return { message: 'Profile deleted successfully' }
+    } catch (error) {
+      if (
+        error instanceof UnauthorizedException ||
+        error instanceof NotFoundException
+      ) {
+        throw error
+      } else {
+        throw new Error('An error occurred while deleting the profile')
+      }
     }
-
-    if (profile.user.id !== incomingId) {
-      throw new UnauthorizedException(
-        'You are not authorized to delete this post',
-      )
-    }
-
-    await this.prisma.profile.delete({
-      where: { id: profileId },
-    })
-
-    return { message: 'Profile deleted successfully' }
   }
 
   async updateProfile(
@@ -60,44 +68,55 @@ export default class ProfileService {
     dto: UpdateProfileDto,
     incomingId: number,
   ) {
-    const profile = await this.prisma.profile.findUnique({
-      where: { id: profileId },
-      include: {
-        user: true,
-      },
-    })
+    try {
+      const profile = await this.prisma.profile.findUnique({
+        where: { id: profileId },
+        include: {
+          user: true,
+        },
+      })
 
-    if (!profile) {
-      throw new NotFoundException('Profile not found')
-    }
+      if (!profile) {
+        throw new NotFoundException('Profile not found')
+      }
 
-    if (profile.user.id !== incomingId) {
-      throw new UnauthorizedException(
-        'You are not authorized to delete this post',
-      )
-    }
+      if (profile.user.id !== incomingId) {
+        throw new UnauthorizedException(
+          'You are not authorized to delete this post',
+        )
+      }
 
-    interface UpdateData {
-      image?: string
-      location?: string
-      bio?: string
-    }
+      interface UpdateData {
+        image?: string
+        location?: string
+        bio?: string
+      }
 
-    const updateData: UpdateData = {}
+      const updateData: UpdateData = {}
 
-    if (dto.image) {
-      updateData.image = dto.image
-    }
-    if (dto.location) {
-      updateData.location = dto.location
-    }
-    if (dto.bio) {
-      updateData.bio = dto.bio
-    }
+      if (dto.image) {
+        updateData.image = dto.image
+      }
+      if (dto.location) {
+        updateData.location = dto.location
+      }
+      if (dto.bio) {
+        updateData.bio = dto.bio
+      }
 
-    return this.prisma.profile.update({
-      where: { id: profileId },
-      data: updateData,
-    })
+      return await this.prisma.profile.update({
+        where: { id: profileId },
+        data: updateData,
+      })
+    } catch (error) {
+      if (
+        error instanceof UnauthorizedException ||
+        error instanceof NotFoundException
+      ) {
+        throw error
+      } else {
+        throw new Error('An error occurred while updating the profile')
+      }
+    }
   }
 }
