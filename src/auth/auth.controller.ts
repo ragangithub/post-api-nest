@@ -4,7 +4,7 @@ import { ApiCreatedResponse, ApiResponse } from '@nestjs/swagger'
 import AuthService from './auth.service'
 import AuthDto from './dto/signupAuth.dto'
 import UpdateAuthDto from './dto/signinAuth.dto'
-import AccessTokenResponseDto from './dto/accessTokenResponseDto'
+import AccessTokenResponse from './accessTokenResponse'
 
 @Controller('auth')
 export default class AuthController {
@@ -15,7 +15,7 @@ export default class AuthController {
 
   @Post('signup')
   @ApiCreatedResponse({
-    type: AccessTokenResponseDto,
+    type: AccessTokenResponse,
   })
   signup(@Body() dto: AuthDto) {
     return this.userService.signup(dto)
@@ -23,7 +23,7 @@ export default class AuthController {
 
   @Post('signin')
   @ApiResponse({
-    type: AccessTokenResponseDto,
+    type: AccessTokenResponse,
   })
   signin(@Body() dto: UpdateAuthDto) {
     return this.authService.signin(dto)

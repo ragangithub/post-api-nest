@@ -1,10 +1,10 @@
 import { Body, Controller, Delete, Param, Post } from '@nestjs/common'
 import AuthDto from 'src/auth/dto/signupAuth.dto'
 import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger'
-import AccessTokenResponseDto from 'src/auth/dto/accessTokenResponseDto'
+import AccessTokenResponseDto from 'src/auth/accessTokenResponse'
 import UserService from './user.service'
 
-@Controller('user')
+@Controller('users')
 export default class UserController {
   constructor(private userService: UserService) {}
 

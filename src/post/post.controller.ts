@@ -15,20 +15,20 @@ import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger'
 import PostDto from './dto/createPost.dto'
 import PostService from './post.service'
 import UpdatePostDto from './dto/updatePost.dto'
-import CreatedPostDto from './dto/CreatedPost.dto'
+import CreatedPost from './CreatedPostResponse'
 
 interface MyUserRequest extends Request {
   user?: any
 }
 
-@Controller('post')
+@Controller('posts')
 @UseGuards(AuthGuard('jwt'))
 export default class PostController {
   constructor(private postService: PostService) {}
 
   @Post()
   @ApiCreatedResponse({
-    type: CreatedPostDto,
+    type: CreatedPost,
   })
   post(@Body() dto: PostDto) {
     return this.postService.post(dto)
@@ -44,8 +44,8 @@ export default class PostController {
   }
 
   @Patch(':id')
-  @ApiOkResponse({
-    type: CreatedPostDto,
+  @ApiCreatedResponse({
+    type: CreatedPost,
   })
   async update(
     @Param('id') id: string,
@@ -63,7 +63,7 @@ export default class PostController {
 
   @Get()
   @ApiOkResponse({
-    type: [CreatedPostDto],
+    type: [CreatedPost],
   })
   async getAllPosts() {
     const allPosts = await this.postService.getAllPosts()

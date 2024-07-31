@@ -14,20 +14,20 @@ import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger'
 import ProfileService from './profile.service'
 import ProfileDto from './dto/createProfile.dto'
 import UpdateProfileDto from './dto/updateProfile.dto'
-import CreatedProfiletDto from './dto/createdProfile.dto'
+import CreatedProfile from './createdProfileResponse'
 
 interface MyUserRequest extends Request {
   user?: any
 }
 
-@Controller('profile')
+@Controller('profiles')
 @UseGuards(AuthGuard('jwt'))
 export default class ProfileController {
   constructor(private profileService: ProfileService) {}
 
   @Post()
   @ApiCreatedResponse({
-    type: CreatedProfiletDto,
+    type: CreatedProfile,
   })
   post(@Body() dto: ProfileDto) {
     return this.profileService.post(dto)
@@ -43,6 +43,9 @@ export default class ProfileController {
   }
 
   @Patch(':id')
+  @ApiCreatedResponse({
+    type: CreatedProfile,
+  })
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateProfileDto,

@@ -26,10 +26,10 @@ async function bootstrap() {
   app.setGlobalPrefix('api')
 
   const config = new DocumentBuilder()
-    .setTitle('Cats example')
-    .setDescription('The cats API description')
+    .setTitle('Posts example')
+    .setDescription('The Posts  API description')
     .setVersion('1.0')
-    .addTag('cats')
+    .addTag('posts')
     .build()
   const document = SwaggerModule.createDocument(app, config)
   SwaggerModule.setup('swagger', app, document)

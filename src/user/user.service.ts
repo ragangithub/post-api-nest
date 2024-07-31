@@ -66,9 +66,9 @@ export default class UserService {
 
       // if the user has any posts
       if (user.posts.length > 0) {
-        Promise.all(
+        await Promise.all(
           user.posts.map(async (post) => {
-            await this.prisma.post.delete({
+            this.prisma.post.delete({
               where: { id: post.id },
             })
           }),

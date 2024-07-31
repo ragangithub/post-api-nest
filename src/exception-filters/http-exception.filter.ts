@@ -13,7 +13,7 @@ export default class GlobalHttpExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest()
 
     const status = exception.getStatus()
-    const exceptionResponse = exception.getResponse()
+    const exceptionResponse: any = exception.getResponse()
 
     console.log('exceptionResponse', exceptionResponse)
 
@@ -21,8 +21,10 @@ export default class GlobalHttpExceptionFilter implements ExceptionFilter {
       statusCode: status,
       timestamp: new Date().toISOString(),
       path: request.url,
+      // message: exceptionResponse['message'],
       message: exceptionResponse.message,
       error: exceptionResponse.error,
+      // error: exceptionResponse['error'],
     })
   }
 }

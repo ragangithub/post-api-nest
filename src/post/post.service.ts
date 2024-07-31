@@ -1,4 +1,5 @@
 import {
+  ForbiddenException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -62,9 +63,7 @@ export default class PostService {
       }
 
       if (post.author.id !== incomingId) {
-        throw new UnauthorizedException(
-          'You are not authorized to delete this post',
-        )
+        throw new ForbiddenException('You are forbidden to delete this post')
       }
 
       await this.prisma.post.delete({
