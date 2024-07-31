@@ -15,6 +15,8 @@ export default class GlobalHttpExceptionFilter implements ExceptionFilter {
     const status = exception.getStatus()
     const exceptionResponse = exception.getResponse()
 
+    console.log('exceptionResponse', exceptionResponse)
+
     response.status(status).json({
       statusCode: status,
       timestamp: new Date().toISOString(),
