@@ -1,10 +1,15 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common'
+import {
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common'
 
 import PrismaService from 'src/prisma/prisma.service'
 import { JwtService } from '@nestjs/jwt'
 import { ConfigService } from '@nestjs/config'
 import * as argon from 'argon2'
 import UpdateAuthDto from './dto/signinAuth.dto'
+import AuthDto from './dto/signupAuth.dto'
 
 @Injectable()
 export default class AuthService {
@@ -13,6 +18,29 @@ export default class AuthService {
     private jwt: JwtService,
     private config: ConfigService,
   ) {}
+
+  async signup(dto: AuthDto) {
+    try {
+      const hash = await argon.hash(dto.password)
+
+      const user = await this.prisma.user.create({
+        data: {
+          email: dto.email,
+          password: hash,
+          username: dto.username,
+          fullname: dto.fullname,
+        },
+      })
+
+      return await this.signToken(user.id, user.email)
+    } catch (error) {
+      if (error.code === 'P2002') {
+        throw new ForbiddenException('Credentials taken')
+      } else {
+        throw new Error('An error occurred while creating a user')
+      }
+    }
+  }
 
   async signin(dto: UpdateAuthDto) {
     try {

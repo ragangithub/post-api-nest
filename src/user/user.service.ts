@@ -2,46 +2,18 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common'
-import AuthDto from 'src/auth/dto/signupAuth.dto'
+
 import PrismaService from 'src/prisma/prisma.service'
-import * as argon from 'argon2'
-import { JwtService } from '@nestjs/jwt'
-import { ConfigService } from '@nestjs/config'
+
+import UpdateUserDto from './dto/updateUser.dto'
 
 @Injectable()
 export default class UserService {
-  constructor(
-    private prisma: PrismaService,
-    private jwt: JwtService,
-    private config: ConfigService,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
-  async signup(dto: AuthDto) {
-    try {
-      const hash = await argon.hash(dto.password)
-
-      const user = await this.prisma.user.create({
-        data: {
-          email: dto.email,
-          password: hash,
-          username: dto.username,
-          fullname: dto.fullname,
-        },
-      })
-
-      // return token
-      return await this.signToken(user.id, user.email)
-    } catch (error) {
-      if (error.code === 'P2002') {
-        throw new ForbiddenException('Credentials taken')
-      } else {
-        throw new Error('An error occurred while creating a user')
-      }
-    }
-  }
-
-  async deleteUser(userId: number) {
+  async deleteUser(userId: number, incomingId: number) {
     try {
       const user = await this.prisma.user.findUnique({
         where: { id: userId },
@@ -53,6 +25,10 @@ export default class UserService {
 
       if (!user) {
         throw new NotFoundException('User not found')
+      }
+
+      if (user.id !== incomingId) {
+        throw new ForbiddenException('You are forbidden to delete this user')
       }
 
       // if the user has a profile
@@ -89,23 +65,71 @@ export default class UserService {
     }
   }
 
-  async signToken(
-    userId: number,
-    email: string,
-  ): Promise<{ access_token: string }> {
-    const payload = {
-      sub: userId,
-      email,
+  async getAllUsers() {
+    try {
+      const allusers = await this.prisma.user.findMany({})
+
+      if (allusers.length === 0) {
+        throw new NotFoundException('No users found')
+      }
+
+      return allusers
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error
+      } else {
+        throw new Error('An error occurred while fetching users')
+      }
     }
-    const secret = this.config.get('JWT_SECRET')
+  }
 
-    const token = await this.jwt.signAsync(payload, {
-      expiresIn: '15m',
-      secret,
-    })
+  async updateUser(userId: number, dto: UpdateUserDto, incomingId: number) {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+      })
 
-    return {
-      access_token: token,
+      if (!user) {
+        throw new NotFoundException('user not found')
+      }
+
+      if (user.id !== incomingId) {
+        throw new UnauthorizedException(
+          'You are not authorized to update this user',
+        )
+      }
+
+      interface UpdateData {
+        email?: string
+        username?: string
+        fullname?: string
+      }
+
+      const updateData: UpdateData = {}
+
+      if (dto.email) {
+        updateData.email = dto.email
+      }
+      if (dto.username) {
+        updateData.username = dto.username
+      }
+      if (dto.fullname) {
+        updateData.fullname = dto.fullname
+      }
+
+      return await this.prisma.user.update({
+        where: { id: userId },
+        data: updateData,
+      })
+    } catch (error) {
+      if (
+        error instanceof UnauthorizedException ||
+        error instanceof NotFoundException
+      ) {
+        throw error
+      } else {
+        throw new Error('An error occurred while updating the user')
+      }
     }
   }
 }
