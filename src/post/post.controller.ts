@@ -6,20 +6,20 @@ import {
   Param,
   Patch,
   Post,
-  Req,
   UseGuards,
 } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
-import { Request } from 'express'
+
 import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger'
+import UserDecorator from 'src/decorators/userDecorators'
 import PostDto from './dto/createPost.dto'
 import PostService from './post.service'
 import UpdatePostDto from './dto/updatePost.dto'
 import CreatedPost from './CreatedPostResponse'
 
-interface MyUserRequest extends Request {
-  user?: any
-}
+// interface MyUserRequest extends Request {
+//   user?: any
+// }
 
 @Controller('posts')
 @UseGuards(AuthGuard('jwt'))
@@ -38,9 +38,9 @@ export default class PostController {
   @ApiOkResponse({
     description: 'Post deleted successfully.',
   })
-  async delete(@Param('id') id: string, @Req() req: MyUserRequest) {
+  async delete(@Param('id') id: string, @UserDecorator() user: any) {
     const postId = parseInt(id, 10)
-    return this.postService.deletePost(postId, req.user.sub)
+    return this.postService.deletePost(postId, user.sub)
   }
 
   @Patch(':id')
@@ -50,14 +50,11 @@ export default class PostController {
   async update(
     @Param('id') id: string,
     @Body() dto: UpdatePostDto,
-    @Req() req: MyUserRequest,
+    // @Req() req: MyUserRequest,
+    @UserDecorator() user: any,
   ) {
     const postId = parseInt(id, 10)
-    const updatedPost = await this.postService.updatePost(
-      postId,
-      dto,
-      req.user.sub,
-    )
+    const updatedPost = await this.postService.updatePost(postId, dto, user.sub)
     return updatedPost
   }
 

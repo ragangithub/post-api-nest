@@ -6,18 +6,15 @@ import {
   Param,
   Patch,
   Post,
-  Req,
 } from '@nestjs/common'
 import AuthDto from 'src/auth/dto/signupAuth.dto'
 import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger'
 import AccessTokenResponseDto from 'src/auth/accessTokenResponse'
 import AuthService from 'src/auth/auth.service'
+import UserDecorator from 'src/decorators/userDecorators'
 import UserService from './user.service'
 import UpdateUserDto from './dto/updateUser.dto'
-
-interface MyUserRequest extends Request {
-  user?: any
-}
+import CreatedUser from './createdUserResponse'
 
 @Controller('users')
 export default class UserController {
@@ -38,12 +35,15 @@ export default class UserController {
   @ApiOkResponse({
     description: 'User deleted successfully.',
   })
-  async delete(@Param('id') id: string, @Req() req: MyUserRequest) {
+  async delete(@Param('id') id: string, @UserDecorator() user: any) {
     const userId = parseInt(id, 10)
-    return this.userService.deleteUser(userId, req.user.sub)
+    return this.userService.deleteUser(userId, user.sub)
   }
 
   @Get()
+  @ApiOkResponse({
+    type: [CreatedUser],
+  })
   async getAllPosts() {
     const allUsers = await this.userService.getAllUsers()
     return allUsers
@@ -53,14 +53,10 @@ export default class UserController {
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateUserDto,
-    @Req() req: MyUserRequest,
+    @UserDecorator() user: any,
   ) {
     const userId = parseInt(id, 10)
-    const updatedPost = await this.userService.updateUser(
-      userId,
-      dto,
-      req.user.sub,
-    )
+    const updatedPost = await this.userService.updateUser(userId, dto, user.sub)
     return updatedPost
   }
 }

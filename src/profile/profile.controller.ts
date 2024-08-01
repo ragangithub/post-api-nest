@@ -5,20 +5,16 @@ import {
   Param,
   Patch,
   Post,
-  Req,
   UseGuards,
 } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
-import { Request } from 'express'
+
 import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger'
+import UserDecorator from 'src/decorators/userDecorators'
 import ProfileService from './profile.service'
 import ProfileDto from './dto/createProfile.dto'
 import UpdateProfileDto from './dto/updateProfile.dto'
 import CreatedProfile from './createdProfileResponse'
-
-interface MyUserRequest extends Request {
-  user?: any
-}
 
 @Controller('profiles')
 @UseGuards(AuthGuard('jwt'))
@@ -37,9 +33,9 @@ export default class ProfileController {
   @ApiOkResponse({
     description: 'Profile deleted successfully.',
   })
-  async delete(@Param('id') id: string, @Req() req: MyUserRequest) {
+  async delete(@Param('id') id: string, @UserDecorator() user: any) {
     const profileId = parseInt(id, 10)
-    return this.profileService.deleteProfile(profileId, req.user.sub)
+    return this.profileService.deleteProfile(profileId, user.sub)
   }
 
   @Patch(':id')
@@ -49,13 +45,13 @@ export default class ProfileController {
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateProfileDto,
-    @Req() req: MyUserRequest,
+    @UserDecorator() user: any,
   ) {
     const profileId = parseInt(id, 10)
     const updatedProfile = await this.profileService.updateProfile(
       profileId,
       dto,
-      req.user.sub,
+      user.sub,
     )
     return updatedProfile
   }

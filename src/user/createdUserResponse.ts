@@ -1,14 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger'
 
-export default class CreatedProfile {
+export default class CreatedUser {
   @ApiProperty()
-  image: string
+  email: string
 
   @ApiProperty()
-  bio: string
+  password: string
 
   @ApiProperty()
-  userId: number
+  fullname: string
+
+  @ApiProperty()
+  username: string
 
   @ApiProperty()
   id: number
