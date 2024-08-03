@@ -12,14 +12,17 @@ import UpdatePostDto from './dto/updatePost.dto'
 export default class PostService {
   constructor(private prisma: PrismaService) {}
 
-  async post(dto: PostDto) {
+  // TODO: It's better to use the user id form authenticated user, access the information by implementing decorator to access the user information
+  // TODO: Use try catch block to handle the error
+
+  async post(dto: PostDto, user: any) {
     const newPost = await this.prisma.post.create({
       data: {
         text: dto.text,
         title: dto.title,
 
         author: {
-          connect: { id: Number(dto.authorId) },
+          connect: { id: Number(user.id) },
         },
       },
     })
@@ -35,6 +38,7 @@ export default class PostService {
         // },
       })
 
+      // TODO: I don't think this is necessary
       if (allPosts.length === 0) {
         throw new NotFoundException('No posts found')
       }
@@ -66,6 +70,7 @@ export default class PostService {
         throw new ForbiddenException('You are forbidden to delete this post')
       }
 
+      // TODO: Implement soft delete by adding deleteAt column in the post table and update the value to current date
       await this.prisma.post.delete({
         where: { id: postId },
       })
@@ -96,12 +101,14 @@ export default class PostService {
         throw new NotFoundException('post not found')
       }
 
+      // TODO: The http exceptioon should be forbidden instead of unauthorized
       if (post.author.id !== incomingId) {
         throw new UnauthorizedException(
           'You are not authorized to delete this post',
         )
       }
 
+      // TODO: this is not the right place to define interface
       interface UpdateData {
         title?: string
         text?: string

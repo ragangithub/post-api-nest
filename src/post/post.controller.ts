@@ -10,18 +10,26 @@ import {
 } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 
-import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger'
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
+} from '@nestjs/swagger'
 import UserDecorator from 'src/decorators/userDecorators'
 import PostDto from './dto/createPost.dto'
 import PostService from './post.service'
 import UpdatePostDto from './dto/updatePost.dto'
-import CreatedPost from './CreatedPostResponse'
+import CreatedPost from './createdPostResponse'
 
+// TODO: Remove unused code
 // interface MyUserRequest extends Request {
 //   user?: any
 // }
 
+// TODO: Add another failed responses for each methods
+// TODO: Add api tags to the controller in order to group the endpoints
 @Controller('posts')
+@ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
 export default class PostController {
   constructor(private postService: PostService) {}
@@ -30,10 +38,11 @@ export default class PostController {
   @ApiCreatedResponse({
     type: CreatedPost,
   })
-  post(@Body() dto: PostDto) {
-    return this.postService.post(dto)
+  post(@Body() dto: PostDto, @UserDecorator() user: any) {
+    return this.postService.post(dto, user)
   }
 
+  // TODO: What haapen if i send sring id instead of number. handle that case
   @Delete(':id')
   @ApiOkResponse({
     description: 'Post deleted successfully.',
@@ -43,6 +52,7 @@ export default class PostController {
     return this.postService.deletePost(postId, user.sub)
   }
 
+  // TODO: What haapen if i send sring id instead of number. handle that case
   @Patch(':id')
   @ApiCreatedResponse({
     type: CreatedPost,

@@ -19,6 +19,11 @@ export default class AuthService {
     private config: ConfigService,
   ) {}
 
+  // TODO : implment for the existance of the user with the same email before creating a new user
+  // TODO : do the use creation on user service and use dependency injection to access the user service
+  // TODO:  The signup method didn't work
+  // TODO: it would be better if you attach the user information on the response after successfully signing up
+
   async signup(dto: AuthDto) {
     try {
       const hash = await argon.hash(dto.password)
@@ -41,6 +46,10 @@ export default class AuthService {
       }
     }
   }
+
+  // TODO: modify the error messages
+  // TODO: it would be better if you attach the user information on the response after successfully signing in
+  // TODO: implement global custom exception error handling
 
   async signin(dto: UpdateAuthDto) {
     try {
@@ -66,6 +75,8 @@ export default class AuthService {
     }
   }
 
+  // TODO: It's a good practice to add ther expire time of the token in dot env file and access using config service
+  // TODO: why do you need to pass the email to the payload?
   async signToken(
     userId: number,
     email: string,

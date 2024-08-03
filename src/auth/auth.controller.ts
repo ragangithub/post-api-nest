@@ -6,6 +6,8 @@ import AuthDto from './dto/signupAuth.dto'
 import UpdateAuthDto from './dto/signinAuth.dto'
 import AccessTokenResponse from './accessTokenResponse'
 
+// TODO: Add api tags to the controller in order to group the endpoints
+// TODO: Add another failed responses for each methods
 @Controller('auth')
 export default class AuthController {
   constructor(private authService: AuthService) {}
