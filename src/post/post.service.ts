@@ -2,7 +2,6 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common'
 import PrismaService from 'src/prisma/prisma.service'
 import PostDto from './dto/createPost.dto'
@@ -34,11 +33,7 @@ export default class PostService {
 
       return allPosts
     } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error
-      } else {
-        throw new Error('An error occurred while fetching posts')
-      }
+      throw new Error('An error occurred while fetching posts')
     }
   }
 
@@ -90,9 +85,7 @@ export default class PostService {
       }
 
       if (post.author.id !== incomingId) {
-        throw new UnauthorizedException(
-          'You are not authorized to delete this post',
-        )
+        throw new ForbiddenException('You are forbidden to update this post')
       }
 
       const updateData: PostUpdateType = {}
@@ -110,7 +103,7 @@ export default class PostService {
       })
     } catch (error) {
       if (
-        error instanceof UnauthorizedException ||
+        error instanceof ForbiddenException ||
         error instanceof NotFoundException
       ) {
         throw error

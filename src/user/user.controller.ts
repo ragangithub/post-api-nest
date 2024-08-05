@@ -4,25 +4,34 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common'
 import AuthDto from 'src/auth/dto/signupAuth.dto'
-import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger'
-import AccessTokenResponseDto from 'src/auth/accessTokenResponse'
+import {
+  ApiForbiddenResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger'
 
 import UserDecorator from 'src/decorators/userDecorators'
+import { AuthGuard } from '@nestjs/passport'
 import UserService from './user.service'
 import UpdateUserDto from './dto/updateUser.dto'
 import CreatedUser from './createdUserResponse'
 
+@ApiTags('users')
+@UseGuards(AuthGuard('jwt'))
 @Controller('users')
 export default class UserController {
   constructor(private userService: UserService) {}
 
   @Post('')
-  @ApiCreatedResponse({
-    type: AccessTokenResponseDto,
+  @ApiOkResponse({
+    type: CreatedUser,
   })
   signup(@Body() dto: AuthDto) {
     return this.userService.createUser(dto)
@@ -32,9 +41,17 @@ export default class UserController {
   @ApiOkResponse({
     description: 'User deleted successfully.',
   })
-  async delete(@Param('id') id: string, @UserDecorator() user: any) {
-    const userId = parseInt(id, 10)
-    return this.userService.deleteUser(userId, user.sub)
+  @ApiForbiddenResponse({
+    description: 'You are forbidden to delete this user',
+  })
+  @ApiNotFoundResponse({
+    description: 'User not found',
+  })
+  async delete(
+    @Param('id', ParseIntPipe) id: number,
+    @UserDecorator() user: any,
+  ) {
+    return this.userService.deleteUser(id, user.id)
   }
 
   @Get()
@@ -43,17 +60,23 @@ export default class UserController {
   })
   async getAllPosts() {
     const allUsers = await this.userService.getAllUsers()
+
     return allUsers
   }
 
   @Patch(':id')
+  @ApiForbiddenResponse({
+    description: 'You are forbidden to update this user',
+  })
+  @ApiNotFoundResponse({
+    description: 'User not found',
+  })
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateUserDto,
     @UserDecorator() user: any,
   ) {
-    const userId = parseInt(id, 10)
-    const updatedPost = await this.userService.updateUser(userId, dto, user.sub)
+    const updatedPost = await this.userService.updateUser(id, dto, user.id)
     return updatedPost
   }
 }

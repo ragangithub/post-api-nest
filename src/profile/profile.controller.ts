@@ -3,19 +3,27 @@ import {
   Controller,
   Delete,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   UseGuards,
 } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 
-import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger'
+import {
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger'
 import UserDecorator from 'src/decorators/userDecorators'
 import ProfileService from './profile.service'
 import ProfileDto from './dto/createProfile.dto'
 import UpdateProfileDto from './dto/updateProfile.dto'
 import CreatedProfile from './createdProfileResponse'
 
+@ApiTags('profiles')
 @Controller('profiles')
 @UseGuards(AuthGuard('jwt'))
 export default class ProfileController {
@@ -33,23 +41,36 @@ export default class ProfileController {
   @ApiOkResponse({
     description: 'Profile deleted successfully.',
   })
-  async delete(@Param('id') id: string, @UserDecorator() user: any) {
-    const profileId = parseInt(id, 10)
-    return this.profileService.deleteProfile(profileId, user.id)
+  @ApiForbiddenResponse({
+    description: 'You are forbidden to delete this profile',
+  })
+  @ApiNotFoundResponse({
+    description: 'Profile not found',
+  })
+  async delete(
+    @Param('id', ParseIntPipe) id: number,
+    @UserDecorator() user: any,
+  ) {
+    return this.profileService.deleteProfile(id, user.id)
   }
 
   @Patch(':id')
   @ApiCreatedResponse({
     type: CreatedProfile,
   })
+  @ApiForbiddenResponse({
+    description: 'You are forbidden to update this profile',
+  })
+  @ApiNotFoundResponse({
+    description: 'Profile not found',
+  })
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateProfileDto,
     @UserDecorator() user: any,
   ) {
-    const profileId = parseInt(id, 10)
     const updatedProfile = await this.profileService.updateProfile(
-      profileId,
+      id,
       dto,
       user.id,
     )

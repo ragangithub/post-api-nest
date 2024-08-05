@@ -5,9 +5,6 @@ export default class CreatedUser {
   email: string
 
   @ApiProperty()
-  password: string
-
-  @ApiProperty()
   fullname: string
 
   @ApiProperty()

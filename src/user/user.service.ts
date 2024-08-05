@@ -61,27 +61,36 @@ export default class UserService {
 
       // if the user has a profile
       if (user.profile) {
-        await this.prisma.profile.delete({
+        await this.prisma.profile.update({
           where: {
             id: user.profile.id,
           },
+          data: {
+            deletedAt: new Date(),
+          } as any,
         })
       }
 
-      // if the user has any posts
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          deletedAt: new Date(),
+        } as any,
+      })
+
+      // if the user has a post
       if (user.posts.length > 0) {
         await Promise.all(
           user.posts.map(async (post) => {
-            this.prisma.post.delete({
+            await this.prisma.post.update({
               where: { id: post.id },
+              data: {
+                deletedAt: new Date(),
+              } as any,
             })
           }),
         )
       }
-
-      await this.prisma.user.delete({
-        where: { id: userId },
-      })
 
       return { message: 'user deleted successfully' }
     } catch (error) {
@@ -95,13 +104,21 @@ export default class UserService {
 
   async getAllUsers() {
     try {
-      const allusers = await this.prisma.user.findMany({})
+      const allUsers = await this.prisma.user.findMany({
+        where: {
+          deletedAt: null,
+        } as any,
+        select: {
+          id: true,
+          email: true,
+          fullname: true,
+          username: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      })
 
-      if (allusers.length === 0) {
-        throw new NotFoundException('No users found')
-      }
-
-      return allusers
+      return allUsers
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error
@@ -122,9 +139,7 @@ export default class UserService {
       }
 
       if (user.id !== incomingId) {
-        throw new UnauthorizedException(
-          'You are not authorized to update this user',
-        )
+        throw new ForbiddenException('You are forbidden to update this user')
       }
 
       const updateData: UserUpdateType = {}

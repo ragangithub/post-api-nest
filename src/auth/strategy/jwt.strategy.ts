@@ -23,7 +23,7 @@ export default class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       },
     })
     delete user.password
-    console.log('user', user)
+
     return user
   }
 }

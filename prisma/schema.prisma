@@ -23,6 +23,8 @@ model User {
   profile Profile?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
 
   @@map("users")
 }
@@ -37,7 +39,7 @@ model Profile{
   user User @relation(fields: [userId], references: [id])
   updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
-  
+  deletedAt DateTime?
 
     @@map("profiles")
 }
@@ -50,6 +52,6 @@ model Post{
   authorId Int
   updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
-
+  deletedAt DateTime?
    @@map("posts")
 }

@@ -1,7 +1,7 @@
 import {
+  ForbiddenException,
   Injectable,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common'
 import PrismaService from 'src/prisma/prisma.service'
 import ProfileDto from './dto/createProfile.dto'
@@ -42,9 +42,7 @@ export default class ProfileService {
       }
 
       if (profile.user.id !== incomingId) {
-        throw new UnauthorizedException(
-          'You are not authorized to delete this post',
-        )
+        throw new ForbiddenException('You are forbidden to delete this profile')
       }
 
       await this.prisma.profile.delete({
@@ -54,7 +52,7 @@ export default class ProfileService {
       return { message: 'Profile deleted successfully' }
     } catch (error) {
       if (
-        error instanceof UnauthorizedException ||
+        error instanceof ForbiddenException ||
         error instanceof NotFoundException
       ) {
         throw error
@@ -82,9 +80,7 @@ export default class ProfileService {
       }
 
       if (profile.user.id !== incomingId) {
-        throw new UnauthorizedException(
-          'You are not authorized to delete this post',
-        )
+        throw new ForbiddenException('You are forbidden to update this post')
       }
 
       const updateData: ProfileUpdateType = {}
@@ -105,7 +101,7 @@ export default class ProfileService {
       })
     } catch (error) {
       if (
-        error instanceof UnauthorizedException ||
+        error instanceof ForbiddenException ||
         error instanceof NotFoundException
       ) {
         throw error
