@@ -12,6 +12,7 @@ import {
 import { AuthGuard } from '@nestjs/passport'
 
 import {
+  ApiBearerAuth,
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiNotFoundResponse,
@@ -26,6 +27,7 @@ import CreatedPost from './CreatedPostResponse'
 
 @ApiTags('posts')
 @Controller('posts')
+@ApiBearerAuth('JWT-auth')
 @UseGuards(AuthGuard('jwt'))
 export default class PostController {
   constructor(private postService: PostService) {}

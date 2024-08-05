@@ -11,6 +11,7 @@ import {
 import { AuthGuard } from '@nestjs/passport'
 
 import {
+  ApiBearerAuth,
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiNotFoundResponse,
@@ -25,6 +26,7 @@ import CreatedProfile from './createdProfileResponse'
 
 @ApiTags('profiles')
 @Controller('profiles')
+@ApiBearerAuth('JWT-auth')
 @UseGuards(AuthGuard('jwt'))
 export default class ProfileController {
   constructor(private profileService: ProfileService) {}

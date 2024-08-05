@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common'
 import AuthDto from 'src/auth/dto/signupAuth.dto'
 import {
+  ApiBearerAuth,
   ApiForbiddenResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -37,6 +38,7 @@ export default class UserController {
     return this.userService.createUser(dto)
   }
 
+  @ApiBearerAuth('JWT-auth')
   @Delete(':id')
   @ApiOkResponse({
     description: 'User deleted successfully.',
@@ -54,6 +56,7 @@ export default class UserController {
     return this.userService.deleteUser(id, user.id)
   }
 
+  @ApiBearerAuth('JWT-auth')
   @Get()
   @ApiOkResponse({
     type: [CreatedUser],
@@ -64,6 +67,7 @@ export default class UserController {
     return allUsers
   }
 
+  @ApiBearerAuth('JWT-auth')
   @Patch(':id')
   @ApiForbiddenResponse({
     description: 'You are forbidden to update this user',
