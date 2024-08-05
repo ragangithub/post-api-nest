@@ -7,11 +7,39 @@ import {
 
 import PrismaService from 'src/prisma/prisma.service'
 
+import * as argon from 'argon2'
+import AuthDto from 'src/auth/dto/signupAuth.dto'
 import UpdateUserDto from './dto/updateUser.dto'
+import UserUpdateType from './types/user'
 
 @Injectable()
 export default class UserService {
   constructor(private prisma: PrismaService) {}
+
+  async createUser(dto: AuthDto) {
+    try {
+      const hash = await argon.hash(dto.password)
+
+      const user = await this.prisma.user.create({
+        data: {
+          email: dto.email,
+          password: hash,
+          username: dto.username,
+          fullname: dto.fullname,
+        },
+      })
+
+      delete user.password
+
+      return user
+    } catch (error) {
+      if (error.code === 'P2002') {
+        throw new ForbiddenException('Credentials taken')
+      } else {
+        throw new Error('An error occurred while creating a user')
+      }
+    }
+  }
 
   async deleteUser(userId: number, incomingId: number) {
     try {
@@ -99,13 +127,7 @@ export default class UserService {
         )
       }
 
-      interface UpdateData {
-        email?: string
-        username?: string
-        fullname?: string
-      }
-
-      const updateData: UpdateData = {}
+      const updateData: UserUpdateType = {}
 
       if (dto.email) {
         updateData.email = dto.email

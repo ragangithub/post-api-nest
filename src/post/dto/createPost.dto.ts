@@ -17,12 +17,4 @@ export default class PostDto {
   @IsNotEmpty()
   @IsString()
   text: string
-
-  @ApiProperty({
-    description: 'id of the owner of post',
-    example: '1',
-  })
-  @IsNotEmpty()
-  @IsString()
-  authorId: string
 }

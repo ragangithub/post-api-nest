@@ -17,10 +17,6 @@ import PostService from './post.service'
 import UpdatePostDto from './dto/updatePost.dto'
 import CreatedPost from './CreatedPostResponse'
 
-// interface MyUserRequest extends Request {
-//   user?: any
-// }
-
 @Controller('posts')
 @UseGuards(AuthGuard('jwt'))
 export default class PostController {
@@ -30,8 +26,8 @@ export default class PostController {
   @ApiCreatedResponse({
     type: CreatedPost,
   })
-  post(@Body() dto: PostDto) {
-    return this.postService.post(dto)
+  post(@Body() dto: PostDto, @UserDecorator() user: any) {
+    return this.postService.post(dto, user.id)
   }
 
   @Delete(':id')
@@ -40,7 +36,7 @@ export default class PostController {
   })
   async delete(@Param('id') id: string, @UserDecorator() user: any) {
     const postId = parseInt(id, 10)
-    return this.postService.deletePost(postId, user.sub)
+    return this.postService.deletePost(postId, user.id)
   }
 
   @Patch(':id')
@@ -50,11 +46,11 @@ export default class PostController {
   async update(
     @Param('id') id: string,
     @Body() dto: UpdatePostDto,
-    // @Req() req: MyUserRequest,
+
     @UserDecorator() user: any,
   ) {
     const postId = parseInt(id, 10)
-    const updatedPost = await this.postService.updatePost(postId, dto, user.sub)
+    const updatedPost = await this.postService.updatePost(postId, dto, user.id)
     return updatedPost
   }
 

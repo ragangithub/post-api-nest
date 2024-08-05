@@ -7,19 +7,20 @@ import PrismaService from 'src/prisma/prisma.service'
 import ProfileDto from './dto/createProfile.dto'
 
 import UpdateProfileDto from './dto/updateProfile.dto'
+import ProfileUpdateType from './types/profile'
 
 @Injectable()
 export default class ProfileService {
   constructor(private prisma: PrismaService) {}
 
-  async post(dto: ProfileDto) {
+  async post(dto: ProfileDto, incomingId: number) {
     const newProfile = await this.prisma.profile.create({
       data: {
         image: dto.image,
         location: dto.location,
         bio: dto.bio,
         user: {
-          connect: { id: Number(dto.userId) },
+          connect: { id: Number(incomingId) },
         },
       },
     })
@@ -86,13 +87,7 @@ export default class ProfileService {
         )
       }
 
-      interface UpdateData {
-        image?: string
-        location?: string
-        bio?: string
-      }
-
-      const updateData: UpdateData = {}
+      const updateData: ProfileUpdateType = {}
 
       if (dto.image) {
         updateData.image = dto.image

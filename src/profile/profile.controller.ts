@@ -25,8 +25,8 @@ export default class ProfileController {
   @ApiCreatedResponse({
     type: CreatedProfile,
   })
-  post(@Body() dto: ProfileDto) {
-    return this.profileService.post(dto)
+  post(@Body() dto: ProfileDto, @UserDecorator() user: any) {
+    return this.profileService.post(dto, user.id)
   }
 
   @Delete(':id')
@@ -35,7 +35,7 @@ export default class ProfileController {
   })
   async delete(@Param('id') id: string, @UserDecorator() user: any) {
     const profileId = parseInt(id, 10)
-    return this.profileService.deleteProfile(profileId, user.sub)
+    return this.profileService.deleteProfile(profileId, user.id)
   }
 
   @Patch(':id')
@@ -51,7 +51,7 @@ export default class ProfileController {
     const updatedProfile = await this.profileService.updateProfile(
       profileId,
       dto,
-      user.sub,
+      user.id,
     )
     return updatedProfile
   }

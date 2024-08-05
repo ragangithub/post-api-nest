@@ -10,7 +10,7 @@ import {
 import AuthDto from 'src/auth/dto/signupAuth.dto'
 import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger'
 import AccessTokenResponseDto from 'src/auth/accessTokenResponse'
-import AuthService from 'src/auth/auth.service'
+
 import UserDecorator from 'src/decorators/userDecorators'
 import UserService from './user.service'
 import UpdateUserDto from './dto/updateUser.dto'
@@ -18,17 +18,14 @@ import CreatedUser from './createdUserResponse'
 
 @Controller('users')
 export default class UserController {
-  constructor(
-    private userService: UserService,
-    private authService: AuthService,
-  ) {}
+  constructor(private userService: UserService) {}
 
   @Post('')
   @ApiCreatedResponse({
     type: AccessTokenResponseDto,
   })
-  signup(@Body() dto: AuthDto): Promise<{ access_token: string }> {
-    return this.authService.signup(dto)
+  signup(@Body() dto: AuthDto) {
+    return this.userService.createUser(dto)
   }
 
   @Delete(':id')

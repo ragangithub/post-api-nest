@@ -7,19 +7,20 @@ import {
 import PrismaService from 'src/prisma/prisma.service'
 import PostDto from './dto/createPost.dto'
 import UpdatePostDto from './dto/updatePost.dto'
+import PostUpdateType from './types/post'
 
 @Injectable()
 export default class PostService {
   constructor(private prisma: PrismaService) {}
 
-  async post(dto: PostDto) {
+  async post(dto: PostDto, incomingId: number) {
     const newPost = await this.prisma.post.create({
       data: {
         text: dto.text,
         title: dto.title,
 
         author: {
-          connect: { id: Number(dto.authorId) },
+          connect: { id: Number(incomingId) },
         },
       },
     })
@@ -29,15 +30,7 @@ export default class PostService {
 
   async getAllPosts() {
     try {
-      const allPosts = await this.prisma.post.findMany({
-        // include: {
-        //   author: true,
-        // },
-      })
-
-      if (allPosts.length === 0) {
-        throw new NotFoundException('No posts found')
-      }
+      const allPosts = await this.prisma.post.findMany({})
 
       return allPosts
     } catch (error) {
@@ -73,7 +66,7 @@ export default class PostService {
       return { message: 'Post deleted successfully' }
     } catch (error) {
       if (
-        error instanceof UnauthorizedException ||
+        error instanceof ForbiddenException ||
         error instanceof NotFoundException
       ) {
         throw error
@@ -102,12 +95,7 @@ export default class PostService {
         )
       }
 
-      interface UpdateData {
-        title?: string
-        text?: string
-      }
-
-      const updateData: UpdateData = {}
+      const updateData: PostUpdateType = {}
 
       if (dto.title) {
         updateData.title = dto.title

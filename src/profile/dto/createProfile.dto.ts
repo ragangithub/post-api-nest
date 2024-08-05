@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator'
+import { IsString } from 'class-validator'
 import { ApiProperty } from '@nestjs/swagger'
 
 export default class ProfileDto {
@@ -22,12 +22,4 @@ export default class ProfileDto {
   })
   @IsString()
   bio: string
-
-  @ApiProperty({
-    description: 'The user ID associated with the profile',
-    example: '1',
-  })
-  @IsNotEmpty()
-  @IsString()
-  userId: string
 }
