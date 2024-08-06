@@ -1,6 +1,11 @@
 import { Body, Controller, Post } from '@nestjs/common'
 
-import { ApiResponse, ApiTags, getSchemaPath } from '@nestjs/swagger'
+import {
+  ApiExtraModels,
+  ApiResponse,
+  ApiTags,
+  getSchemaPath,
+} from '@nestjs/swagger'
 import CreatedUser from 'src/user/createdUserResponse'
 import AuthService from './auth.service'
 import AuthDto from './dto/signupAuth.dto'
@@ -14,6 +19,7 @@ export default class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('signup')
+  @ApiExtraModels(AccessTokenResponse)
   @ApiResponse({
     content: {
       'application/json': {
@@ -21,7 +27,6 @@ export default class AuthController {
           type: 'object',
           properties: {
             user: { $ref: getSchemaPath(CreatedUser) },
-
             access_token: { $ref: getSchemaPath(AccessTokenResponse) },
           },
         },

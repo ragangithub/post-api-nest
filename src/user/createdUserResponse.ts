@@ -13,9 +13,9 @@ export default class CreatedUser {
   @ApiProperty()
   id: number
 
-  @ApiProperty()
-  updatedAt: Date
+  // @ApiProperty()
+  // updatedAt: Date
 
-  @ApiProperty()
-  createdAt: Date
+  // @ApiProperty()
+  // createdAt: Date
 }
