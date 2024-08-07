@@ -2,8 +2,11 @@ import { NestFactory } from '@nestjs/core'
 import { Logger, ValidationPipe } from '@nestjs/common'
 import { WinstonModule } from 'nest-winston'
 import { ConfigService } from '@nestjs/config'
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
 import winstonLoggerInstance from './utils/logger/winston.logger'
 import AppModule from './app.module'
+
+import GlobalHttpExceptionFilter from './exception-filters/http-exception.filter'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -18,7 +21,29 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   )
+
+  app.useGlobalFilters(new GlobalHttpExceptionFilter())
   app.setGlobalPrefix('api')
+
+  const config = new DocumentBuilder()
+    .setTitle('Posts example')
+    .setDescription('The Posts  API description')
+    .setVersion('1.0')
+    .addTag('posts')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Enter JWT token',
+        in: 'header',
+      },
+      'JWT-auth',
+    )
+    .build()
+  const document = SwaggerModule.createDocument(app, config)
+  SwaggerModule.setup('swagger', app, document)
 
   await app.listen(configService.get<number>('APP_PORT') || 3000, async () =>
     logger.verbose(`Application running at: ${await app.getUrl()}`),
